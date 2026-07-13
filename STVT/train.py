@@ -405,23 +405,24 @@ def train_net(args):
         epoch = resume_model(model, optimizer, args)
 
     args.cuda = not args.no_cuda and torch.cuda.is_available()
-    # if torch.backends.mps.is_available() and not args.no_cuda:
-    #     device = torch.device("cuda")
-    #     args.cuda = False  # keep legacy variable false
-    #     args.mps = True
-    # elif torch.cuda.is_available() and not args.no_cuda:
-    #     device = torch.device("cuda")
-    #     args.cuda = True
-    #     args.mps = False
-    # else:
-    #     device = torch.device("cpu")
-    #     args.cuda = False
-    #     args.mps = False
+    
+    if torch.backends.mps.is_available() and not args.no_cuda:
+        device = torch.device("cuda")
+        args.cuda = False  # keep legacy variable false
+        args.mps = True
+    elif torch.cuda.is_available() and not args.no_cuda:
+        device = torch.device("cuda")
+        args.cuda = True
+        args.mps = False
+    else:
+        device = torch.device("cpu")
+        args.cuda = False
+        args.mps = False
 
-    if device.type == "cuda":
-        print("GPU:", torch.cuda.get_device_name(0))
-    if device.type == "cuda":
-        cudnn.benchmark = True
+    # if device.type == "cuda":
+    #     print("GPU:", torch.cuda.get_device_name(0))
+    # if device.type == "cuda":
+    #     cudnn.benchmark = True
 
     # if args.cuda:
     model.to(device)
