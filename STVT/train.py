@@ -6,6 +6,7 @@ import time
 import numpy as np
 import pandas as pd
 import tensorboardX
+
 import torch
 import torch.backends.cudnn as cudnn
 import torch.nn as nn
@@ -22,7 +23,7 @@ from STVT.utils import (
 )
 from tqdm import tqdm
 
-device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 pd_epoch = []
 pd_batch_size = []
 pd_lr = []
@@ -403,37 +404,40 @@ def train_net(args):
     if args.resume:
         epoch = resume_model(model, optimizer, args)
 
-    # args.cuda = not args.no_cuda and torch.cuda.is_available()
-    if torch.backends.mps.is_available() and not args.no_cuda:
-        device = torch.device("mps")
-        args.cuda = False  # keep legacy variable false
-        args.mps = True
-    elif torch.cuda.is_available() and not args.no_cuda:
-        device = torch.device("cuda")
-        args.cuda = True
-        args.mps = False
-    else:
-        device = torch.device("cpu")
-        args.cuda = False
-        args.mps = False
+    args.cuda = not args.no_cuda and torch.cuda.is_available()
+    # if torch.backends.mps.is_available() and not args.no_cuda:
+    #     device = torch.device("cuda")
+    #     args.cuda = False  # keep legacy variable false
+    #     args.mps = True
+    # elif torch.cuda.is_available() and not args.no_cuda:
+    #     device = torch.device("cuda")
+    #     args.cuda = True
+    #     args.mps = False
+    # else:
+    #     device = torch.device("cpu")
+    #     args.cuda = False
+    #     args.mps = False
 
-    print("Using device:", device)
-    cudnn.benchmark = True
+    if device.type == "cuda":
+        print("GPU:", torch.cuda.get_device_name(0))
+    if device.type == "cuda":
+        cudnn.benchmark = True
 
     # if args.cuda:
     model.to(device)
 
     # device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-    device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Use label smoothing if specified
     if args.label_smoothing > 0:
         criterion = nn.CrossEntropyLoss(
-            weight=torch.FloatTensor([A, B]).to(device),
+            # weight=torch.FloatTensor([A, B]).to(device),
+            weights = torch.tensor([A, B], dtype=torch.float32, device=device),
             label_smoothing=args.label_smoothing,
         )
     else:
-        criterion = nn.CrossEntropyLoss(weight=torch.FloatTensor([A, B])).to(device)
+        criterion = nn.CrossEntropyLoss(torch.tensor([A, B], dtype=torch.float32, device=device))
 
     print("Start training...")
 
@@ -554,6 +558,6 @@ def train_net(args):
         epoch += 1
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": 
     args = parse_args()
     train_net(args)
