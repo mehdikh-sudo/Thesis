@@ -427,9 +427,9 @@ def train_net(args):
     # if args.cuda:
     model.to(device)
 
-    # device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+    
     # Use label smoothing if specified
     if args.label_smoothing > 0:
         criterion = nn.CrossEntropyLoss(
@@ -439,7 +439,8 @@ def train_net(args):
         )
     else:
         criterion = nn.CrossEntropyLoss(torch.tensor([A, B], dtype=torch.float32, device=device))
-
+    
+  
     print("Start training...")
 
     global pd_epoch
