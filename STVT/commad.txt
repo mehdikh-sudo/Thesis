@@ -1,0 +1,4 @@
+
+
+
+python train_claude.py --dataset SumMe_RFR_Normalized --test_dataset "21,22,23,24,25" --lr 0.0005 --weight_decay 1e-3 --warmup_epochs 3 --epochs 50 --roundtimes "2_sp5_NewVallloss"
