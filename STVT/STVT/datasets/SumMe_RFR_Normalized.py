@@ -190,7 +190,7 @@ def SumMe_RFR_Normalized(args, distributed=False):
     test_arr = list(map(int, args.test_dataset.split(',')))
     train_arr = [i for i in all_arr if i not in test_arr]
 
-    file_dir = '/Users/mehdikhosravi/Master/Thesis/STVT-main/STVT/datasets/datasets/SumMe_Rgb_Flow_Resnet_matched.h5'
+    file_dir = '/kaggle/input/datasets/mehdikhosravi76/summe-rfr-normalized/SumMe_RFR_Normalized.h5'
     video_amount = train_arr
     train_data = SumMe_RFR_NormalizedDataset(file_dir=file_dir, video_amount=video_amount, F_In_target=True)
     train_loader = DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=True, drop_last=True)
