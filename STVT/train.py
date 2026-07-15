@@ -1,12 +1,12 @@
 import argparse
 import datetime
 import os
+import sys
 import time
 
 import numpy as np
 import pandas as pd
 import tensorboardX
-
 import torch
 import torch.backends.cudnn as cudnn
 import torch.nn as nn
@@ -23,7 +23,21 @@ from STVT.utils import (
 )
 from tqdm import tqdm
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# ---------------------------------------------------------------------------
+# Device selection: CUDA > MPS (Apple Silicon) > CPU.
+# This is computed ONCE, here, and used everywhere in the file (train(), val(),
+# train_net()). Do NOT re-assign `device` anywhere else in this file - earlier
+# versions of this script re-checked/overwrote `device` inside train_net(),
+# which silently forced CPU on any machine without an Apple GPU (e.g. Kaggle).
+# ---------------------------------------------------------------------------
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+elif torch.backends.mps.is_available():
+    device = torch.device("mps")
+else:
+    device = torch.device("cpu")
+
 pd_epoch = []
 pd_batch_size = []
 pd_lr = []
@@ -33,7 +47,10 @@ pd_val_loss = []  # Add validation loss tracking
 pd_F_measure_k = []
 # ... add these ...
 pd_Spearman_rho_k = []
+pd_Best_Spearman_rho_k = []
+
 pd_Kendall_tau_k = []
+pd_Best_Kendall_tau_k = []
 pd_BERTScore_k = []
 pd_Best_F_measure = []
 
@@ -173,7 +190,13 @@ def parse_args():
         "--gpu_id", default="0", type=str, help="id(s) for CUDA_VISIBLE_DEVICES"
     )
 
-    args = parser.parse_args()
+    # Use parse_known_args() instead of parse_args() so this script does not
+    # crash when run inside a Jupyter/Kaggle notebook, which injects its own
+    # kernel arguments (e.g. -f /root/.local/.../kernel.json) into sys.argv.
+    # A plain script run from the terminal still works exactly the same way.
+    args, unknown = parser.parse_known_args()
+    if unknown:
+        print("Ignoring unrecognized args (expected in notebooks):", unknown)
 
     if torch.cuda.is_available():
         os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
@@ -301,19 +324,6 @@ def val(model, val_loader, epoch, args, criterion):
     print("Kendall_tau_k:", tau_k)
     print(f"BERTScore_feature_k: {bert_k:.4f}")
 
-    # eval_res = select_keyshots(predicted_multi_list, video_number_list, image_number_list, target_multi_list, args)
-    # fscore_k = 0
-    # for i in eval_res:
-    #     fscore_k+=i[2]
-    # fscore_k/= len(list(args.test_dataset.split(",")))
-    # pd_F_measure_k.append(fscore_k)
-
-    # save_model(model, args, fscore_k, epoch)
-    # print("test video number:")
-    # print(args.test_dataset)
-    # print("F_measure_k:")
-    # print(fscore_k)
-
 
 def train(model, train_loader, optimizer, criterion, epoch, args):
 
@@ -404,43 +414,29 @@ def train_net(args):
     if args.resume:
         epoch = resume_model(model, optimizer, args)
 
-    args.cuda = not args.no_cuda and torch.cuda.is_available()
-    
-    if torch.backends.mps.is_available() and not args.no_cuda:
-        device = torch.device("cuda")
-        args.cuda = False  # keep legacy variable false
-        args.mps = True
-    elif torch.cuda.is_available() and not args.no_cuda:
-        device = torch.device("cuda")
-        args.cuda = True
-        args.mps = False
-    else:
-        device = torch.device("cpu")
-        args.cuda = False
-        args.mps = False
+    # NOTE: `device` is the module-level global set once at the top of this
+    # file (CUDA > MPS > CPU). We just set the args.cuda/args.mps flags here
+    # to match it - we do NOT re-assign `device` itself, since train()/val()
+    # read that same global and must stay in sync with wherever the model
+    # actually lives.
+    args.cuda = device.type == "cuda"
+    args.mps = device.type == "mps"
 
-    # if device.type == "cuda":
-    #     print("GPU:", torch.cuda.get_device_name(0))
-    # if device.type == "cuda":
-    #     cudnn.benchmark = True
+    print("Using device:", device)
+    if args.cuda:
+        cudnn.benchmark = True
 
-    # if args.cuda:
     model.to(device)
 
-    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
     # Use label smoothing if specified
     if args.label_smoothing > 0:
         criterion = nn.CrossEntropyLoss(
-            # weight=torch.FloatTensor([A, B]).to(device),
-            weights = torch.tensor([A, B], dtype=torch.float32, device=device),
+            weight=torch.FloatTensor([A, B]).to(device),
             label_smoothing=args.label_smoothing,
         )
     else:
-        criterion = nn.CrossEntropyLoss(torch.tensor([A, B], dtype=torch.float32, device=device))
-    
-  
+        criterion = nn.CrossEntropyLoss(weight=torch.FloatTensor([A, B]).to(device))
+
     print("Start training...")
 
     global pd_epoch
@@ -460,12 +456,16 @@ def train_net(args):
     patience_counter = 0
     best_model_state = None
     best_f1 = 0
+    best_spearman = 0
+    best_kendal = 0
     patience = args.early_stop_patience
 
     while epoch < args.epochs:
         pd_epoch.append(epoch)
         pd_batch_size.append(args.batch_size)
         pd_Best_F_measure.append(best_f1)
+        pd_Best_Kendall_tau_k.append(best_kendal)
+        pd_Best_Spearman_rho_k.append(best_spearman)
         Stime = time.time()
         train(model, train_loader, optimizer, criterion, epoch, args)
         if (epoch + 1) % args.test_epochs == 0:
@@ -479,15 +479,29 @@ def train_net(args):
                 current_f1 = pd_F_measure_k[-1]
                 if current_f1 > best_f1:
                     best_f1 = current_f1
+                    # patience_counter = 0
+                save_model(model, args, best_f1, epoch)
+                # torch.save(model.state_dict(),args.roundtimes+".pth")
+
+            if len(pd_Kendall_tau_k) and len(pd_Spearman_rho_k) > 0:
+                current_spearman = pd_Spearman_rho_k[-1]
+                current_kendal = pd_Kendall_tau_k[-1]
+                if current_spearman > best_spearman and current_kendal > best_kendal:
+                    best_kendal = current_kendal
+                    best_spearman = current_spearman
+
                     patience_counter = 0
-                    print(f"**New best F-score** : {best_f1:.4f}")
-                    torch.save(model.state_dict(), "best_model.pth")
+
+                    print(f"**New Best spearman and kendal** : {best_spearman:.4f} and {best_kendal:.4f}")
+
+                    save_model(model, args, best_spearman, epoch)
                 else:
                     patience_counter += 1
                     print(f"-patience {patience_counter}")
                     # if patience_counter >= patience:
                     #     print(f"-Early stopping at epoch {epoch}")
                     #     break
+
             # added best fscore model
 
             # # Early stopping check (removed)
@@ -512,11 +526,16 @@ def train_net(args):
         Etime = time.time()
         runtime = str(datetime.timedelta(seconds=int(Etime - Stime)))
         pd_runtime.append(runtime)
+
+        # Make sure the output directory exists (Kaggle's /kaggle/working tree
+        # won't have this folder structure unless we create it).
+        os.makedirs("./STVT/work_dirs/Record/csv/" + args.dataset, exist_ok=True)
+
         if (
             args.dataset == "TVSum"
             or args.dataset == "TvSum_Rgb_Flow_Resnet"
             or args.dataset == "TvSum_Rgb_Flow"
-            or args.dataset == "TVSum_RFR_matched_10class"
+            or args.dataset == "TVSum_RFR_Normalized"
         ):
             ddict = {
                 "test_dataset": args.test_dataset,
@@ -527,8 +546,11 @@ def train_net(args):
                 "train_loss": pd_loss,
                 "val_loss": pd_val_loss,
                 "F_measure_k": pd_F_measure_k,
+                "Best_F_measure": pd_Best_F_measure,
                 "Spearman_rho_k": pd_Spearman_rho_k,
+                "Best_Spearman_rho_k": pd_Best_Spearman_rho_k,
                 "Kendall_tau_k": pd_Kendall_tau_k,
+                "Best_Kendall_tau_k": pd_Best_Kendall_tau_k,
                 "BERTScore_k": pd_BERTScore_k,
             }
         else:
@@ -544,7 +566,9 @@ def train_net(args):
                 "F_measure_k": pd_F_measure_k,
                 "Best_F_measure": pd_Best_F_measure,
                 "Spearman_rho_k": pd_Spearman_rho_k,
+                "Best_Spearman_rho_k": pd_Best_Spearman_rho_k,
                 "Kendall_tau_k": pd_Kendall_tau_k,
+                "Best_Kendall_tau_k": pd_Best_Kendall_tau_k,
                 "BERTScore_k": pd_BERTScore_k,
             }
         dataframe = pd.DataFrame(ddict)
@@ -560,6 +584,6 @@ def train_net(args):
         epoch += 1
 
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
     args = parse_args()
     train_net(args)
