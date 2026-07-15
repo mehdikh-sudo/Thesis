@@ -174,6 +174,7 @@ def select_keyshots(
             eval_metrics(pred_summary, true_summary_1)
             for true_summary_1 in true_summary_arr_20
         ]
+        
         eval_res = (
             np.mean(eval_res_list, axis=0).tolist()
             if args.dataset == "TVSum"
@@ -183,6 +184,8 @@ def select_keyshots(
             else np.max(eval_res_list, axis=0).tolist()
         )
 
+
+
         # ---- 🟢 Spearman's ρ & Kendall's τ-b (all datasets) ----
         # Average all annotators' binary selections into one continuous score per frame.
         # e.g. a frame chosen by 12 of 15 annotators gets score 0.8 vs 0.13 for 2/15.
@@ -191,10 +194,27 @@ def select_keyshots(
         rho_list = []
         tau_list = []
 
-        avg_gt_score = np.mean(true_summary_arr_20,axis=0)  # shape: (num_frames,)
+
+
+        # TVSum: use gtscore (averaged raw 1-5 annotations, continuous, richer ranking).
+        # SumMe: no 1-5 scores available; average the 15 binary user_summary annotations
+        #        to get a consensus rate per frame (0.0-1.0 in steps of 1/15).
+        # Normalisation is NOT needed: Spearman/Kendall are rank-invariant.
+
+        if (
+            args.dataset == "TVSum"
+            or args.dataset == "TvSum_Rgb_Flow_Resnet"
+            or args.dataset == "TvSum_Rgb_Flow"
+            or args.dataset == "TVSum_RFR_Normalized"
+        ):
+            avg_gt_score = video["gtscore"][:]  # shape: (num_frames,), range 1-5
+        else:
+
+            avg_gt_score = np.mean(true_summary_arr_20,axis=0)  # shape: (num_frames,) range 0-1
         
         rho_list.append(spearmanr(pred_score, avg_gt_score)[0])
         tau_list.append(kendalltau(rankdata(pred_score), rankdata(avg_gt_score))[0])
+
         # if np.isnan(rho_final):
         #     rho_final = 0.0
         # if np.isnan(tau_final):
@@ -210,7 +230,7 @@ def select_keyshots(
         #         tau = 0
         #     rho_list.append(rho)
         #     tau_list.append(tau)
-        
+
         rho_final = np.mean(rho_list)
         tau_final = np.mean(tau_list)
 
@@ -270,7 +290,7 @@ def select_keyshots(
             args.dataset == "TVSum"
             or args.dataset == "TvSum_Rgb_Flow_Resnet"
             or args.dataset == "TvSum_Rgb_Flow_Resnet"
-            or args.dataset == "TVSum_RFR_matched_10class"
+            or args.dataset == "TVSum_RFR_Normalized"
         ):
             bertscore_final = np.mean(bertscore_list)
         else:
