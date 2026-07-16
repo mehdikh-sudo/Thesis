@@ -65,47 +65,66 @@ def cross_entropy_with_label_smoothing(pred, target, eta=0.1):
     return cross_entropy_for_onehot(pred, onehot_target)
 
 
+# def save_model(model, args, best_fscore_k, epoch):
+#     if os.path.exists(
+#         "./STVT/model/"
+#         + args.dataset
+#         + "/model_"
+#         + str(args.roundtimes)
+#         + "_roundtimes"
+#     ):
+#         shutil.rmtree(
+#             "./STVT/model/"
+#             + args.dataset
+#             + "/model_"
+#             + str(args.roundtimes)
+#             + "_roundtimes"
+#         )
+#     if not os.path.exists(
+#         "./STVT/model/"
+#         + args.dataset
+#         + "/model_"
+#         + str(args.roundtimes)
+#         + "_roundtimes"
+#     ):
+#         os.mkdir(
+#             "./STVT/model/"
+#             + args.dataset
+#             + "/model_"
+#             + str(args.roundtimes)
+#             + "_roundtimes"
+#         )
+#     path = (
+#         "./STVT/model/"
+#         + args.dataset
+#         + "/model_"
+#         + str(args.roundtimes)
+#         + "_roundtimes/"
+#         + str(args.dataset)
+#         + "_"
+#         + str(epoch)
+#         + "_"
+#         + str(best_fscore_k)
+#         + ".pth"
+#     )
+#     torch.save(model.state_dict(), path)
+
+
 def save_model(model, args, best_fscore_k, epoch):
-    if os.path.exists(
-        "./STVT/model/"
-        + args.dataset
-        + "/model_"
-        + str(args.roundtimes)
-        + "_roundtimes"
-    ):
-        shutil.rmtree(
-            "./STVT/model/"
-            + args.dataset
-            + "/model_"
-            + str(args.roundtimes)
-            + "_roundtimes"
-        )
-    if not os.path.exists(
-        "./STVT/model/"
-        + args.dataset
-        + "/model_"
-        + str(args.roundtimes)
-        + "_roundtimes"
-    ):
-        os.mkdir(
-            "./STVT/model/"
-            + args.dataset
-            + "/model_"
-            + str(args.roundtimes)
-            + "_roundtimes"
-        )
-    path = (
-        "./STVT/model/"
-        + args.dataset
-        + "/model_"
-        + str(args.roundtimes)
-        + "_roundtimes/"
-        + str(args.dataset)
-        + "_"
-        + str(epoch)
-        + "_"
-        + str(best_fscore_k)
-        + ".pth"
+    save_dir = os.path.join(
+        "/kaggle/working/STVT/model",
+        args.dataset,
+        f"model_{args.roundtimes}_roundtimes",
+    )
+
+    if os.path.exists(save_dir):
+        shutil.rmtree(save_dir)
+
+    os.makedirs(save_dir, exist_ok=True)
+
+    path = os.path.join(
+        save_dir,
+        f"{args.dataset}_{epoch}_{best_fscore_k}.pth",
     )
     torch.save(model.state_dict(), path)
 
