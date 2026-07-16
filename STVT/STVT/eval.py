@@ -28,7 +28,7 @@ def eval_metrics(y_pred, y_true):
 
 
 # def select_keyshots(predicted_list, video_number_list,image_name_list,target_list,args):
-#     data_path = '/Users/mehdikhosravi/Master/Thesis/STVT-main/STVT/datasets/datasets/'+str(args.dataset)+".h5"
+#     data_path = '/Users/mehdikhosravi/Master/Thesis/STVT-main/STVT/datasets/datasets/'+str(args.dataset).lower()+".h5"
 #     data_file = h5py.File(data_path)
 
 #     predicted_single_video = []
