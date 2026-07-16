@@ -163,7 +163,7 @@ def STVT(dataset='SumMe'):
         img_dim = 4
         out_dim = 2
         patch_dim = 1
-    elif dataset == 'TVSum'  or dataset=='TVSum_Rgb_Flow_Resnet' or dataset=='TVSum_Rgb_Flow' or dataset=='TVSum_RFR_matched_10class':
+    elif dataset == 'TVSum'  or dataset='TVSum_RFR_Normalized' or dataset=='TVSum_Rgb_Flow_Resnet' or dataset=='TVSum_Rgb_Flow' or dataset=='TVSum_RFR_matched_10class':
         img_dim = 4
         out_dim = 2
         patch_dim = 1
