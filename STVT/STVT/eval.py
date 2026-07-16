@@ -27,71 +27,6 @@ def eval_metrics(y_pred, y_true):
     return [precision, recall, fscore]
 
 
-# def select_keyshots(predicted_list, video_number_list,image_name_list,target_list,args):
-#     data_path = '/Users/mehdikhosravi/Master/Thesis/STVT-main/STVT/datasets/datasets/'+str(args.dataset).lower()+".h5"
-#     data_file = h5py.File(data_path)
-
-#     predicted_single_video = []
-#     predicted_single_video_list = []
-#     target_single_video = []
-#     target_single_video_list = []
-#     video_single_list = list(set(video_number_list))
-#     eval_arr = []
-
-#     for i in range(len(image_name_list)):
-#         if image_name_list[i] == 1 and i!=0:
-#             predicted_single_video_list.append(predicted_single_video)
-#             target_single_video_list.append(target_single_video)
-#             predicted_single_video = []
-#             target_single_video = []
-
-#         predictedL = [predicted_list[i]]
-#         predicted_single_video += predictedL
-#         targetL = list(map(int, str(target_list[i])))
-#         target_single_video += targetL
-
-#         if i == len(image_name_list)-1:
-#             predicted_single_video_list.append(predicted_single_video)
-#             target_single_video_list.append(target_single_video)
-#     video_single_list_sort = sorted(video_single_list)
-#     True_all_video_len = 0
-#     for i in range(len(video_single_list_sort)):
-#         index = str(video_single_list_sort[i])
-#         video = data_file['video_' + index]
-#         fea_sequencelen = (len(video['feature'][:])//args.sequence)*args.sequence
-#         True_all_video_len += fea_sequencelen
-
-#     for i in range(len(video_single_list_sort)):
-#         index = str(video_single_list_sort[i])
-#         video = data_file['video_' + index]
-#         cps = video['change_points'][:]
-#         vidlen = int(cps[-1][1]) + 1
-#         weight = video['n_frame_per_seg'][:]
-#         fea_sequencelen = (len(video['feature'][:])//args.sequence)*args.sequence
-#         for ckeck_n in range(len(video_single_list_sort)):
-#             dif = True_all_video_len-len(predicted_list)
-#             if len(predicted_single_video_list[ckeck_n]) == fea_sequencelen or len(predicted_single_video_list[ckeck_n]) == fea_sequencelen-dif:
-#                 pred_score = np.array(predicted_single_video_list[ckeck_n])
-#                 up_rate = vidlen//len(pred_score)
-#                 # print(up_rate)
-#                 break
-#         #pred
-#         pred_score = upsample(pred_score, up_rate, vidlen)
-#         pred_value = np.array([pred_score[cp[0]:cp[1]].mean() for cp in cps])
-#         _, selected = knapsack(pred_value, weight, int(0.15 * vidlen))
-#         selected = selected[::-1]
-#         key_labels = np.zeros((vidlen,))
-#         for i in selected:
-#             key_labels[cps[i][0]:cps[i][1]] = 1
-#         pred_summary = key_labels.tolist()
-#         true_summary_arr_20 = video['user_summary'][:]
-#         eval_res = [eval_metrics(pred_summary, true_summary_1) for true_summary_1 in true_summary_arr_20]
-#         eval_res = np.mean(eval_res, axis=0).tolist() if args.dataset == "TVSum" else np.max(eval_res, axis=0).tolist()
-#         eval_arr.append(eval_res)
-
-#     return eval_arr
-
-
 def select_keyshots(
     predicted_list, video_number_list, image_name_list, target_list, args
 ):
@@ -218,21 +153,6 @@ def select_keyshots(
         rho_list.append(spearmanr(pred_score, avg_gt_score)[0])
         tau_list.append(kendalltau(rankdata(pred_score), rankdata(avg_gt_score))[0])
 
-        # if np.isnan(rho_final):
-        #     rho_final = 0.0
-        # if np.isnan(tau_final):
-        #     tau_final = 0.0
-
-
-        # for true_summary_1 in true_summary_arr_20:
-        #     rho, _ = spearmanr(pred_score, true_summary_1)
-        #     tau, _ = kendalltau(pred_score, true_summary_1)
-        #     if np.isnan(rho):
-        #         rho = 0
-        #     if np.isnan(tau):
-        #         tau = 0
-        #     rho_list.append(rho)
-        #     tau_list.append(tau)
 
         rho_final = np.mean(rho_list)
         tau_final = np.mean(tau_list)
@@ -299,37 +219,11 @@ def select_keyshots(
         else:
             bertscore_final = np.max(bertscore_list)
 
-        # print(f"Feature BERTScore - P: {P:.4f}, R: {R:.4f}, F1: {F1:.4f}")
-
-        ##the first bert score feature:
-        # bertscore_list = []
-        # for true_summary_1 in true_summary_arr_20:
-        #     pred_idx = np.where(np.array(pred_summary) == 1)[0]
-        #     true_idx = np.where(np.array(true_summary_1) == 1)[0]
-        #     if len(pred_idx) == 0 or len(true_idx) == 0:
-        #         bertscore = 0
-        #     else:
-        #         max_idx = len(video['feature']) - 1
-        #         pred_idx = np.clip(pred_idx, 0, max_idx)
-        #         true_idx = np.clip(true_idx, 0, max_idx)
-
-        #         pred_feat = video['feature'][pred_idx]
-        #         true_feat = video['feature'][true_idx]
-
-        #         sim = cosine_similarity(pred_feat, true_feat)
-        #         bertscore = np.mean(sim)
-        #     bertscore_list.append(bertscore)
-        # if args.dataset == "TVSum" or args.dataset=='TvSum_Rgb_Flow_Resnet'  or args.dataset=='TvSum_Rgb_Flow_Resnet':
-        #     bertscore_final = np.mean(bertscore_list)
-        # else:
-        #      bertscore_final = np.max(bertscore_list)
-
-        # Append metrics — unified for all datasets
-        # eval_res indices: [0]=precision [1]=recall [2]=fscore [3]=bert [4]=rho [5]=tau
         
         eval_res += [bertscore_final, rho_final, tau_final]
 
         eval_arr.append(eval_res)
+        
     # print("pred range:", pred_score.min(), pred_score.max())
     # print("gt range:", avg_gt_score.min(), avg_gt_score.max())
 
