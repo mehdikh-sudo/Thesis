@@ -96,8 +96,9 @@ def select_keyshots(
     predicted_list, video_number_list, image_name_list, target_list, args
 ):
     data_path = (
-        "/kaggle/input/datasets/mehdikhosravi76/"+"summe-rfr-normalized"+"/"
-        + str(args.dataset)
+        "/kaggle/input/datasets/mehdikhosravi76/"+"summe-rfr-normalized"+"/" +"TvSum_RFR_Normalized"
+        # + str(args.dataset)
+        
         + ".h5"
     )
     data_file = h5py.File(data_path)
