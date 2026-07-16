@@ -181,6 +181,7 @@ def select_keyshots(
             or args.dataset == "TvSum_Rgb_Flow_Resnet"
             or args.dataset == "TvSum_Rgb_Flow"
             or args.dataset == "TVSum_RFR_matched_10class"
+            or args.dataset== "TVSum_RFR_Normalized"
             else np.max(eval_res_list, axis=0).tolist()
         )
 
@@ -206,6 +207,7 @@ def select_keyshots(
             or args.dataset == "TvSum_Rgb_Flow_Resnet"
             or args.dataset == "TvSum_Rgb_Flow"
             or args.dataset == "TVSum_RFR_Normalized"
+            
         ):
             avg_gt_score = video["gtscore"][:]  # shape: (num_frames,), range 1-5
         else:
