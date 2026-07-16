@@ -4,8 +4,8 @@ from torch.utils.data import Dataset, DataLoader
 import numpy as np
 # from sklearn.decomposition import PCA
 
-def TVSum_RFR_matched_10class(args, distributed=False):
-    class TVSum_RFR_matched_10classDataset(Dataset):
+def TVSum_RFR_Normalized(args, distributed=False):
+    class TVSum_RFR_NormalizedDataset(Dataset):
         global In_target
         In_target = 0
         def __init__(self, file_dir, video_amount, F_In_target=False):
@@ -79,12 +79,12 @@ def TVSum_RFR_matched_10class(args, distributed=False):
     train_arr = [i for i in all_arr if i not in test_arr]
     #file_dir = './STVT/datasets/datasets/'+str(args.dataset)+".h5"
     #file_dir = '/Users/mehdikhosravi/Master/Thesis/STVT-main/STVT/datasets/datasets/'+str(args.dataset)+".h5"
-    file_dir = '/Users/mehdikhosravi/Master/Thesis/STVT-main/STVT/datasets/datasets/TVSum_RFR_matched_10class.h5' #stvt_i3d_tvsum
+    file_dir = '/Users/mehdikhosravi/Master/Thesis/STVT-main/STVT/datasets/datasets/TVSum_RFR_Normalized.h5' #stvt_i3d_tvsum
     video_amount = train_arr
-    train_data = TVSum_RFR_matched_10classDataset(file_dir=file_dir, video_amount=video_amount, F_In_target=True)
+    train_data = TVSum_RFR_NormalizedDataset(file_dir=file_dir, video_amount=video_amount, F_In_target=True)
     train_loader = DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=True, drop_last=True)
     video_amount = test_arr
-    test_data = TVSum_RFR_matched_10classDataset(file_dir=file_dir, video_amount=video_amount, F_In_target=False)
+    test_data = TVSum_RFR_NormalizedDataset(file_dir=file_dir, video_amount=video_amount, F_In_target=False)
     test_loader = DataLoader(dataset=test_data, batch_size=args.val_batch_size, shuffle=False, drop_last=True)
 
     return train_loader, test_loader, In_target
