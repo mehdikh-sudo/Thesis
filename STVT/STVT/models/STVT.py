@@ -135,8 +135,8 @@ class SpatioTemporal_Vision_Transformer(nn.Module):
         # apply transformer
         x = self.transformer(x).permute(0, 2, 1)
         x = self.mlp_multi(x)
-        #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
         x_outputs = torch.zeros(self.num_patches, bs, self.out_dim).to(device)
         orix1 = self.mlp_single(x).permute(0, 2, 1)
         #SIFA Encoder (Spatial Intra-Frame Attention (SIA) Encoder)
