@@ -30,13 +30,16 @@ def eval_metrics(y_pred, y_true):
 def select_keyshots(
     predicted_list, video_number_list, image_name_list, target_list, args
 ):
-    data_path = (
-        "/kaggle/input/datasets/mehdikhosravi76/"+"summe-rfr-normalized"+"/" +"TvSum_RFR_Normalized"
-        # + str(args.dataset)
+    # data_path = (
+    #     "/kaggle/input/datasets/mehdikhosravi76/"+"summe-rfr-normalized"+"/" +"TvSum_RFR_Normalized"
+    #     # + str(args.dataset)
         
-        + ".h5"
-    )
-    data_file = h5py.File(data_path)
+    #     + ".h5"
+    # )
+    # data_file = h5py.File(data_path)
+
+    data_path = os.path.join(args.data_path, f"{args.dataset}.h5")
+    data_file = h5py.File(data_path, "r")
 
     predicted_single_video = []
     predicted_single_video_list = []
