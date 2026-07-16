@@ -190,6 +190,14 @@ def parse_args():
         "--gpu_id", default="0", type=str, help="id(s) for CUDA_VISIBLE_DEVICES"
     )
 
+
+    parser.add_argument(
+    "--data_path",
+    type=str,
+    default="/kaggle/input/datasets/mehdikhosravi76/summe-rfr-normalized",
+    help="Folder containing the dataset's .h5 file",
+        )
+
     # Use parse_known_args() instead of parse_args() so this script does not
     # crash when run inside a Jupyter/Kaggle notebook, which injects its own
     # kernel arguments (e.g. -f /root/.local/.../kernel.json) into sys.argv.
