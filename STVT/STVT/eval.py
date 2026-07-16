@@ -96,7 +96,7 @@ def select_keyshots(
     predicted_list, video_number_list, image_name_list, target_list, args
 ):
     data_path = (
-        "/kaggle/input/datasets/mehdikhosravi76/"+str(args.dataset)
+        "/kaggle/input/datasets/mehdikhosravi76/"+str(args.dataset)+"/"
         + str(args.dataset)
         + ".h5"
     )
