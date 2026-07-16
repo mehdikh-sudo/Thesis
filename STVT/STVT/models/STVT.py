@@ -177,10 +177,10 @@ def STVT(dataset='SumMe'):
         # Defualt :
         num_channels=512, 
 
-        # embedding_dim=768,
-        # num_heads=12, 
-        # num_layers=12,
-        # hidden_dim=3072,
+        embedding_dim=768,
+        num_heads=12, 
+        num_layers=12,
+        hidden_dim=3072,
 
         dropout_rate=0.1,
         attn_dropout_rate=0.0,
@@ -197,10 +197,10 @@ def STVT(dataset='SumMe'):
 
 
         # Both_halved config:
-        embedding_dim=384,
-        num_heads=6, 
-        num_layers=6,
-        hidden_dim=1536,
+        # embedding_dim=384,
+        # num_heads=6, 
+        # num_layers=6,
+        # hidden_dim=1536,
 
 
 
