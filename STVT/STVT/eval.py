@@ -84,6 +84,22 @@ def select_keyshots(
         fea_sequencelen = (len(video["feature"][:]) // args.sequence) * args.sequence
 
         # Find the right prediction list matching this video
+        # for check_n in range(len(video_single_list_sort)):
+        #     dif = True_all_video_len - len(predicted_list)
+        #     if (
+        #         len(predicted_single_video_list[check_n]) == fea_sequencelen
+        #         or len(predicted_single_video_list[check_n]) == fea_sequencelen - dif
+        #     ):
+        #         pred_score = np.array(predicted_single_video_list[check_n])
+        #         up_rate = vidlen // len(pred_score)
+        #         break
+
+        # Upsample to match original frame length
+        # pred_score = upsample(pred_score, up_rate, vidlen)
+
+
+        # Find the right prediction list matching this video
+        pred_score = None
         for check_n in range(len(video_single_list_sort)):
             dif = True_all_video_len - len(predicted_list)
             if (
@@ -93,6 +109,13 @@ def select_keyshots(
                 pred_score = np.array(predicted_single_video_list[check_n])
                 up_rate = vidlen // len(pred_score)
                 break
+
+        if pred_score is None:
+            lengths = [len(p) for p in predicted_single_video_list]
+            raise RuntimeError(
+                f"No match for video_{index}: expected {fea_sequencelen} "
+                f"(or {fea_sequencelen - dif}), got lengths {lengths}"
+            )
 
         # Upsample to match original frame length
         pred_score = upsample(pred_score, up_rate, vidlen)
