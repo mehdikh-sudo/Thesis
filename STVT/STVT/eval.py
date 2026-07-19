@@ -142,9 +142,10 @@ def select_keyshots(
             np.mean(eval_res_list, axis=0).tolist()
             if args.dataset == "TVSum"
             or args.dataset == "TvSum_Rgb_Flow_Resnet"
-            or args.dataset == "TvSum_Rgb_Flow"
-            or args.dataset == "TVSum_RFR_matched_10class"
+
             or args.dataset== "TVSum_RFR_Normalized"
+            or args.dataset== "TVSum_Resnet_Rgb"
+            or args.dataset== "TVSum_Resnet_Flow"
             else np.max(eval_res_list, axis=0).tolist()
         )
 
@@ -168,8 +169,10 @@ def select_keyshots(
         if (
             args.dataset == "TVSum"
             or args.dataset == "TvSum_Rgb_Flow_Resnet"
-            or args.dataset == "TvSum_Rgb_Flow"
+            
             or args.dataset == "TVSum_RFR_Normalized"
+            or args.dataset== "TVSum_Resnet_Rgb"
+            or args.dataset== "TVSum_Resnet_Flow"
             
         ):
             avg_gt_score = video["gtscore"][:]  # shape: (num_frames,), range 1-5
@@ -238,9 +241,10 @@ def select_keyshots(
                 bertscore_list.append(feature_bertscore(cand_features, ref_features))
         if (
             args.dataset == "TVSum"
-            or args.dataset == "TvSum_Rgb_Flow_Resnet"
-            or args.dataset == "TvSum_Rgb_Flow_Resnet"
+            or args.dataset == "TVSum_Rgb_Flow_Resnet"
             or args.dataset == "TVSum_RFR_Normalized"
+            or args.dataset== "TVSum_Resnet_Rgb"
+            or args.dataset== "TVSum_Resnet_Flow"
         ):
             bertscore_final = np.mean(bertscore_list)
         else:
