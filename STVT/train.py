@@ -539,46 +539,46 @@ def train_net(args):
         # won't have this folder structure unless we create it).
         os.makedirs("./STVT/work_dirs/Record/csv/" + args.dataset, exist_ok=True)
 
-        if (
-            args.dataset == "TVSum"
-            or args.dataset == "TvSum_Rgb_Flow_Resnet"
-            or args.dataset == "TvSum_Rgb_Flow"
-            or args.dataset == "TVSum_RFR_Normalized"
-        ):
-            ddict = {
-                "test_dataset": args.test_dataset,
-                "epoch": pd_epoch,
-                "Batch_size": pd_batch_size,
-                "lr": pd_lr,
-                "runtime": pd_runtime,
-                "train_loss": pd_loss,
-                "val_loss": pd_val_loss,
-                "F_measure_k": pd_F_measure_k,
-                "Best_F_measure": pd_Best_F_measure,
-                "Spearman_rho_k": pd_Spearman_rho_k,
-                "Best_Spearman_rho_k": pd_Best_Spearman_rho_k,
-                "Kendall_tau_k": pd_Kendall_tau_k,
-                "Best_Kendall_tau_k": pd_Best_Kendall_tau_k,
-                "BERTScore_k": pd_BERTScore_k,
-            }
-        else:
-            ddict = {
-                "test_dataset": args.test_dataset,
-                "weight_decay": args.weight_decay,
-                "epoch": pd_epoch,
-                "Batch_size": pd_batch_size,
-                "lr": pd_lr,
-                "runtime": pd_runtime,
-                "train_loss": pd_loss,
-                "val_loss": pd_val_loss,
-                "F_measure_k": pd_F_measure_k,
-                "Best_F_measure": pd_Best_F_measure,
-                "Spearman_rho_k": pd_Spearman_rho_k,
-                "Best_Spearman_rho_k": pd_Best_Spearman_rho_k,
-                "Kendall_tau_k": pd_Kendall_tau_k,
-                "Best_Kendall_tau_k": pd_Best_Kendall_tau_k,
-                "BERTScore_k": pd_BERTScore_k,
-            }
+        # if (
+        #     args.dataset == "TVSum"
+        #     or args.dataset == "TvSum_Rgb_Flow_Resnet"
+        #     or args.dataset == "TvSum_Rgb_Flow"
+        #     or args.dataset == "TVSum_RFR_Normalized"
+        # ):
+        #     ddict = {
+        #         "test_dataset": args.test_dataset,
+        #         "epoch": pd_epoch,
+        #         "Batch_size": pd_batch_size,
+        #         "lr": pd_lr,
+        #         "runtime": pd_runtime,
+        #         "train_loss": pd_loss,
+        #         "val_loss": pd_val_loss,
+        #         "F_measure_k": pd_F_measure_k,
+        #         "Best_F_measure": pd_Best_F_measure,
+        #         "Spearman_rho_k": pd_Spearman_rho_k,
+        #         "Best_Spearman_rho_k": pd_Best_Spearman_rho_k,
+        #         "Kendall_tau_k": pd_Kendall_tau_k,
+        #         "Best_Kendall_tau_k": pd_Best_Kendall_tau_k,
+        #         "BERTScore_k": pd_BERTScore_k,
+        #     }
+        # else:
+        ddict = {
+            "test_dataset": args.test_dataset,
+            "weight_decay": args.weight_decay,
+            "epoch": pd_epoch,
+            "Batch_size": pd_batch_size,
+            "lr": pd_lr,
+            "runtime": pd_runtime,
+            "train_loss": pd_loss,
+            "val_loss": pd_val_loss,
+            "F_measure_k": pd_F_measure_k,
+            "Best_F_measure": pd_Best_F_measure,
+            "Spearman_rho_k": pd_Spearman_rho_k,
+            "Best_Spearman_rho_k": pd_Best_Spearman_rho_k,
+            "Kendall_tau_k": pd_Kendall_tau_k,
+            "Best_Kendall_tau_k": pd_Best_Kendall_tau_k,
+            "BERTScore_k": pd_BERTScore_k,
+        }
         dataframe = pd.DataFrame(ddict)
         csv_path = (
             "./STVT/work_dirs/Record/csv/"
