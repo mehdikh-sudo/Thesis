@@ -1,108 +1,8 @@
-# import torch
-# import h5py
-# from torch.utils.data import Dataset, DataLoader
-# import numpy as np
-
-# # Module-level counter — reset explicitly before each scan
-# In_target = 0
-
-# def SumMe_RFR_Normalized(args, distributed=False):
-#     class SumMe_RFR_NormalizedDataset(Dataset):
-#         def __init__(self, file_dir, video_amount, F_In_target=False):
-#             self.image_label_list = self.read_file(file_dir, video_amount, F_In_target)
-#             self.video_amount = video_amount
-#             self.len = len(self.image_label_list)
-#             self.F_In_target = F_In_target
-
-#         def __getitem__(self, i):
-#             index = i % self.len
-#             img, label, video_number, imagenumber = self.image_label_list[index]
-#             return img, label, video_number, imagenumber
-
-#         def __len__(self):
-#             return self.len
-
-#         def read_file(self, file_dir, video_amount, F_In_target):
-#             global In_target
-#             with h5py.File(file_dir, "r") as f:
-#                 patch_number = args.sequence
-#                 dim = 512
-#                 image_label_list = []
-#                 for key in f.keys():
-#                     video_number = int(key[6:])
-#                     if video_number in video_amount:
-#                         video = f[key]
-#                         features = video['feature'][:]
-#                         gtsummary = video['label'][:]
-
-#                         downsample_image_number = len(features)
-#                         gonumber = int(downsample_image_number / patch_number)
-#                         for ds_image_index in range(gonumber):
-#                             for index_column in range(int(patch_number ** 0.5)):
-#                                 image_row = np.reshape(
-#                                     features[ds_image_index * patch_number + index_column * int(patch_number ** 0.5)],
-#                                     (dim, 1, 1))
-#                                 for index_row in range(1, int(patch_number ** 0.5)):
-#                                     image = np.reshape(
-#                                         features[ds_image_index * patch_number + index_column * int(patch_number ** 0.5) + index_row],
-#                                         (dim, 1, 1))
-#                                     image_row = np.concatenate(([image_row, image]), axis=2)
-#                                 if index_column == 0:
-#                                     cat_image = image_row
-#                                 else:
-#                                     cat_image = np.concatenate(([cat_image, image_row]), axis=1)
-
-#                             cat_image = torch.FloatTensor(cat_image.tolist())
-#                             f_gtsummary = gtsummary[ds_image_index * patch_number:(ds_image_index + 1) * patch_number]
-#                             if F_In_target:
-#                                 In_target += sum(f_gtsummary)   # count positives for THIS split
-#                             f_gtsummary = torch.tensor(f_gtsummary, dtype=torch.long)
-#                             f_video_number = torch.tensor(
-#                                 [video_number] * patch_number, dtype=torch.long)
-#                             f_image_number = torch.tensor(
-#                                 list(range(ds_image_index * patch_number + 1,
-#                                            (ds_image_index + 1) * patch_number + 1)),
-#                                 dtype=torch.long)
-#                             image_label_list.append((cat_image, f_gtsummary, f_video_number, f_image_number))
-#             return image_label_list
-
-#     # ------------------------------------------------------------------ #
-#     # Build split arrays
-#     # ------------------------------------------------------------------ #
-#     all_arr = list(range(1, 26))
-#     test_arr  = list(map(int, args.test_dataset.split(',')))
-#     train_arr = [i for i in all_arr if i not in test_arr]
-
-#     file_dir = '/Users/mehdikhosravi/Master/Thesis/STVT-main/STVT/datasets/datasets/SumMe_RFR_Normalized.h5'
-
-#     # ---- Train loader ---- #
-#     global In_target
-#     In_target = 0                          # reset before train scan
-#     train_data = SumMe_RFR_NormalizedDataset(file_dir=file_dir, video_amount=train_arr, F_In_target=True)
-#     train_loader = DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=True, drop_last=True)
-#     train_In_target = In_target            # save train positive-frame count
-
-#     # ---- Val loader ---- #
-#     In_target = 0                          # reset before val scan
-#     test_data = SumMe_RFR_NormalizedDataset(file_dir=file_dir, video_amount=test_arr, F_In_target=True)
-#     test_loader = DataLoader(dataset=test_data, batch_size=args.val_batch_size, shuffle=False, drop_last=True)
-#     val_In_target = In_target              # val positive-frame count
-
-#     # Restore so train_net() receives the training-set value as the 3rd element
-#     In_target = train_In_target
-
-#     # Return 4 values: train_loader, val_loader, In_target, val_In_target
-#     return train_loader, test_loader, train_In_target, val_In_target
-
-
-
-
-
 import torch
 import h5py
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
-
+import os
 def SumMe_RFR_Normalized(args, distributed=False):
     class SumMe_RFR_NormalizedDataset(Dataset):
         global In_target
@@ -190,7 +90,7 @@ def SumMe_RFR_Normalized(args, distributed=False):
     test_arr = list(map(int, args.test_dataset.split(',')))
     train_arr = [i for i in all_arr if i not in test_arr]
 
-    file_dir = '/kaggle/input/datasets/mehdikhosravi76/summe-rfr-normalized/SumMe_RFR_Normalized.h5'
+    file_dir = os.path.join(args.data_path, f"{args.dataset}.h5") 
     video_amount = train_arr
     train_data = SumMe_RFR_NormalizedDataset(file_dir=file_dir, video_amount=video_amount, F_In_target=True)
     train_loader = DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=True, drop_last=True)
