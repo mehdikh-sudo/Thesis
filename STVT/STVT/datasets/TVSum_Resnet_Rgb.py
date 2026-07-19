@@ -5,8 +5,8 @@ import numpy as np
 from sklearn.decomposition import PCA
 import os
 
-def TVSum_i3d_FR(args, distributed=False):
-    class TVSum_i3d_FRDataset(Dataset):
+def TVSum_Resnet_Rgb(args, distributed=False):
+    class TVSum_Resnet_RgbDataset(Dataset):
         global In_target
         In_target = 0
         def __init__(self, file_dir, video_amount, F_In_target=False):
@@ -35,11 +35,6 @@ def TVSum_i3d_FR(args, distributed=False):
                     if video_number in video_amount:
                         video = f[key]
                         features = video['feature'][:]
-                        #Apply PCA (for dimensionality reduction) for I3d feature of dimention 1024
-                        pca = PCA(n_components=512)
-                        reduced = pca.fit_transform(features)
-                        features=reduced
-                        #end
                         gtsummary = video['label'][:]
 
                         downsample_image_number = len(features)
@@ -82,10 +77,10 @@ def TVSum_i3d_FR(args, distributed=False):
     #file_dir = '/Users/mehdikhosravi/Master/Thesis/STVT-main/STVT/datasets/datasets/'+str(args.dataset)+".h5"
     file_dir = os.path.join(args.data_path, f"{args.dataset}.h5") 
     video_amount = train_arr
-    train_data = TVSum_i3d_FRDataset(file_dir=file_dir, video_amount=video_amount, F_In_target=True)
+    train_data = TVSum_Resnet_RgbDataset(file_dir=file_dir, video_amount=video_amount, F_In_target=True)
     train_loader = DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=True, drop_last=True)
     video_amount = test_arr
-    test_data = TVSum_i3d_FRDataset(file_dir=file_dir, video_amount=video_amount, F_In_target=False)
+    test_data = TVSum_Resnet_RgbDataset(file_dir=file_dir, video_amount=video_amount, F_In_target=False)
     test_loader = DataLoader(dataset=test_data, batch_size=args.val_batch_size, shuffle=False, drop_last=True)
 
     return train_loader, test_loader, In_target
