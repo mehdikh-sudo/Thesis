@@ -2,9 +2,10 @@ import torch
 import h5py
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
+import os
 
-def SumMe_normalized_concat_rfr(args, distributed=False):
-    class SumMe_normalized_concat_rfrDataset(Dataset):
+def SumMe_Resnet_Flow(args, distributed=False):
+    class SumMe_Resnet_FlowDataset(Dataset):
         global In_target
         In_target = 0
         def __init__(self, file_dir, video_amount, F_In_target=False):
@@ -27,7 +28,6 @@ def SumMe_normalized_concat_rfr(args, distributed=False):
             with h5py.File(file_dir, "r") as f:
                 patch_number = args.sequence
                 dim = 512
-                # dim=1024
                 image_label_list = []
                 for key in f.keys():
                     video_number = int(key[6:])
@@ -73,13 +73,13 @@ def SumMe_normalized_concat_rfr(args, distributed=False):
     test_arr = list(map(int, args.test_dataset.split(',')))
     train_arr = [i for i in all_arr if i not in test_arr]
 
-    file_dir = '/Users/mehdikhosravi/Master/Thesis/STVT-main/STVT/datasets/datasets/SumMe_normalized_concat_rfr.h5'
-    # file_dir = './STVT/datasets/datasets/stvt_i3d_tvsum.h5'
+    file_dir = os.path.join(args.data_path, f"{args.dataset}.h5") 
+    
     video_amount = train_arr
-    train_data = SumMe_normalized_concat_rfrDataset(file_dir=file_dir, video_amount=video_amount, F_In_target=True)
+    train_data = SumMe_Resnet_FlowDataset(file_dir=file_dir, video_amount=video_amount, F_In_target=True)
     train_loader = DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=True, drop_last=True)
     video_amount = test_arr
-    test_data = SumMe_normalized_concat_rfrDataset(file_dir=file_dir, video_amount=video_amount, F_In_target=False)
+    test_data = SumMe_Resnet_FlowDataset(file_dir=file_dir, video_amount=video_amount, F_In_target=False)
     test_loader = DataLoader(dataset=test_data, batch_size=args.val_batch_size, shuffle=False, drop_last=True)
 
     return train_loader, test_loader, In_target
