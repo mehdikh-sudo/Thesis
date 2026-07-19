@@ -3,6 +3,7 @@ import h5py
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
 from sklearn.decomposition import PCA
+import os
 
 def TVSum_i3d_FR(args, distributed=False):
     class TVSum_i3d_FRDataset(Dataset):
@@ -79,7 +80,7 @@ def TVSum_i3d_FR(args, distributed=False):
     train_arr = [i for i in all_arr if i not in test_arr]
     #file_dir = './STVT/datasets/datasets/'+str(args.dataset)+".h5"
     #file_dir = '/Users/mehdikhosravi/Master/Thesis/STVT-main/STVT/datasets/datasets/'+str(args.dataset)+".h5"
-    file_dir = '/Users/mehdikhosravi/Master/Thesis/STVT-main/STVT/datasets/datasets/TVSum_i3d_FR.h5' #stvt_i3d_tvsum
+    file_dir =  #stvt_i3d_tvsum
     video_amount = train_arr
     train_data = TVSum_i3d_FRDataset(file_dir=file_dir, video_amount=video_amount, F_In_target=True)
     train_loader = DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=True, drop_last=True)
