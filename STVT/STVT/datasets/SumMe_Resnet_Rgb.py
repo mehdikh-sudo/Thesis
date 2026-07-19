@@ -2,6 +2,7 @@ import torch
 import h5py
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
+import os
 
 from sklearn.decomposition import PCA
 
@@ -76,7 +77,7 @@ def SumMe_Resnet_Rgb(args, distributed=False):
     test_arr = list(map(int, args.test_dataset.split(',')))
     train_arr = [i for i in all_arr if i not in test_arr]
 
-    file_dir = '/Users/mehdikhosravi/Master/Thesis/STVT-main/STVT/datasets/datasets/SumMe_i3d_FR.h5'
+    file_dir = os.path.join(args.data_path, f"{args.dataset}.h5") 
 
     video_amount = train_arr
     train_data = SumMe_Resnet_RgbDataset(file_dir=file_dir, video_amount=video_amount, F_In_target=True)
