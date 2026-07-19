@@ -2,7 +2,7 @@ import torch
 import h5py
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
-
+import os
 
 def TVSum_Rgb_Flow(args, distributed=False):
     class TVSum_Rgb_FlowDataset(Dataset):
@@ -79,7 +79,7 @@ def TVSum_Rgb_Flow(args, distributed=False):
     train_arr = [i for i in all_arr if i not in test_arr]
     #file_dir = './STVT/datasets/datasets/'+str(args.dataset)+".h5"
     #file_dir = '/Users/mehdikhosravi/Master/Thesis/STVT-main/STVT/datasets/datasets/'+str(args.dataset)+".h5"
-    file_dir = '/Users/mehdikhosravi/Master/Thesis/STVT-main/STVT/datasets/datasets/TVSum_Rgb_Flow.h5' #stvt_i3d_tvsum
+    file_dir = os.path.join(args.data_path, f"{args.dataset}.h5") #stvt_i3d_tvsum
     video_amount = train_arr
     train_data = TVSum_Rgb_FlowDataset(file_dir=file_dir, video_amount=video_amount, F_In_target=True)
     train_loader = DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=True, drop_last=True)
