@@ -112,7 +112,8 @@ def cross_entropy_with_label_smoothing(pred, target, eta=0.1):
 
 def save_model(model, args, best_fscore_k, epoch):
     save_dir = os.path.join(
-        "/kaggle/working/STVT/model",
+        # "/kaggle/working/STVT/model",
+       " /content/drive/MyDrive",
         args.dataset,
         f"model_{args.roundtimes}_roundtimes",
     )
