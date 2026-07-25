@@ -559,8 +559,8 @@ def train_net(args):
         }
         dataframe = pd.DataFrame(ddict)
         csv_path = (
-            # "./STVT/work_dirs/Record/csv/"
-            "/content/drive/MyDrive/"
+            "./STVT/work_dirs/Record/csv/"
+            # "/content/drive/MyDrive/"
             + args.dataset
             + "/Record_"
             + str(args.roundtimes)
