@@ -10,7 +10,7 @@ Please put them into "./STVT/datasets/datasets"
 
 ```
 cd STVT
-train.py --roundtimes save_name --dataset TVSum or SumMe
+train.py --roundtimes save_name --dataset TVSum/SumMe/TVSum_rfr_normalied/SumMe_rfr_Normalized
 ```
 The eval is included in training.py   
 
