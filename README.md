@@ -24,4 +24,4 @@ Please cite the following papers when you apply the code.
 
 
 
-python train.py --dataset SumMe --epochs 2 --batch_size 4
+python train.py --dataset SumMe --epochs 100 --batch_size 40
