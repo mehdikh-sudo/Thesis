@@ -1,4 +1,4 @@
-
+## Video Summarization using Spatio-temporal Vision Transformer and Motion Features
 ## Usage
 
 First, download the dataset file  
